@@ -2796,7 +2796,7 @@ function exploreCombatPlayer() {
 
 
 
-
+        let zTotalPower = 0
         for (const member in team) {
             if (team[member].pkmn==undefined) continue
             if (testAbility(member, ability.soulAsterism.id) && moveType == 'ghost') totalPower *= 1.1
@@ -2826,7 +2826,6 @@ function exploreCombatPlayer() {
 
 
             const zUser = team[member].pkmn
-            let zTotalPower = 0
             let zPower = 30
             let zTyping = item[team[member].item].zType
 
@@ -2873,19 +2872,25 @@ function exploreCombatPlayer() {
             
             } 
 
-            zTotalPower *= 10
+            zTotalPower *= 8
 
             if (zUser.type.includes(zTyping)) zTotalPower *= 1.5
 
+
+            if (areas[saved.currentArea].fieldEffect?.includes(field.wonderWard.id) && typeEffectiveness(zTyping, pkmn[saved.currentPkmn].type) <= 1) zTotalPower *= 0.2
+
+
             let zTypeMultiplier = typeEffectiveness(zTyping, pkmn[saved.currentPkmn].type)
+            if (areas[saved.currentArea].fieldEffect?.includes(field.ironBody.id) && typeEffectiveness(zTyping, pkmn[saved.currentPkmn].type)>1) zTypeMultiplier = 1
+
             zTotalPower *= zTypeMultiplier
 
 
-  
+            if (team[member].damageDealt==undefined||team[member].damageDealt==NaN) team[member].damageDealt = 0
+            team[member].damageDealt += Math.min(zTotalPower, wildPkmnHp)
 
 
             if (zSplit == `random`) zTotalPower *= 1.25
-            wildPkmnHp -= zTotalPower;
 
             if (afkSeconds<10){
             console.info(`Z-move executed: Dealt ${zTotalPower.toFixed(0)} damage`)
@@ -2978,8 +2983,11 @@ function exploreCombatPlayer() {
 
 
 
+
         if (team[exploreActiveMember].damageDealt==undefined||team[exploreActiveMember].damageDealt==NaN) team[exploreActiveMember].damageDealt = 0
         team[exploreActiveMember].damageDealt += Math.min(totalPower, wildPkmnHp)
+
+        totalPower += zTotalPower
         
         if (saved.currentArea == areas.frontierBattleFactory.id) {
 
